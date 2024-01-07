@@ -68,7 +68,7 @@ void loop()
   if(output_current<0.01){  // If the current sensor cannot measure meaningful data basically
     current_error_I = 0; // Set zero so that error it is not accumulated when system is not energized
     pwmWrite(pwm_pin,0); // Do not charge the battery
-    Serial.print("No input voltage is supplied !");
+    Serial.println("No input voltage is supplied !");
     return; // Rest of the code will not be run
   }
 
@@ -95,14 +95,19 @@ void loop()
   pwm_value = fabs(u_current); // floating absolute value of the control signal
   duty = pwm_value/255*100; // duty value (%) calculated just for our interpretation
   input_voltage = output_voltage/duty/1.35; // Multiplier 1.35 comes from 3-phase full-bridge rectifier (Vline-to-line)
+  
+  if(u_current<0){
+    pwm_value= 25.0;
+  }
 
+/*
 // High input voltage protection 
   if (input_voltage>30.0){ // High input voltage protection
     pwmWrite(pwm_pin,0);
     Serial.print("Input voltage is too high !");
     return; // Rest of the code will not be run
   }
-
+*/
 
 // Limit pwm value
   if(pwm_value < 1){    // Output pwm can never go below 0
@@ -111,7 +116,7 @@ void loop()
   if(pwm_value > 250){   // Output pwm can never go above 255 we do not even give full duty just for safety
     pwm_value = 255*0.9;
   }
-  
+  duty = pwm_value/255*100;
 
 // Print values to serial for interpretation
   Serial.print("output current: ");
